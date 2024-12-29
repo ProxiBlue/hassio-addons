@@ -101,5 +101,16 @@ echo "CREATE ROLE root WITH LOGIN SUPERUSER CREATEDB CREATEROLE PASSWORD 'secure
 \q"> setup_postgres.sql
 psql "postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOSTNAME:$DB_PORT" < setup_postgres.sql || true
 
+###############################################
+# Import / restore initial db (for migration) #
+###############################################
+
+if [ -f /share/postgresql_immich_restore.sql ]; then
+    bashio::log.info "Your previous database was detected at install under /share/postgresql_immich_restore.sql and will be imported"
+    cat "/share/postgresql_immich_restore.sql" \
+    | sed "s/SELECT pg_catalog.set_config('search_path', '', false);/SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);/g" \
+    | psql "postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOSTNAME:$DB_PORT" || true
+    rm -rf /share/postgresql_immich_restore.sql
+fi
 # Clean
 rm setup_postgres.sql
