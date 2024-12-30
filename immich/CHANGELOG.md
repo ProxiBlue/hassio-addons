@@ -1,3 +1,5 @@
+## 1.124.0 (30-12-2024)
+- Add ability to import / restore existing db.
 
 ## 1.123.0 (21-12-2024)
 - Update to latest version from imagegenius/docker-immich (changelog : https://github.com/imagegenius/docker-immich/releases)

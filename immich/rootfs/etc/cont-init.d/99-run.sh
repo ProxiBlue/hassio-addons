@@ -95,18 +95,24 @@ fi
 # Create database #
 ###################
 
-# Create database if does not exist
-echo "CREATE ROLE root WITH LOGIN SUPERUSER CREATEDB CREATEROLE PASSWORD 'securepassword';
-     CREATE DATABASE immich; CREATE USER immich WITH ENCRYPTED PASSWORD 'immich'; GRANT ALL PRIVILEGES ON DATABASE immich to immich;
-\q"> setup_postgres.sql
-psql "postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOSTNAME:$DB_PORT" < setup_postgres.sql || true
-
+## Create database if does not exist
+#echo "CREATE ROLE root WITH LOGIN SUPERUSER CREATEDB CREATEROLE PASSWORD 'securepassword';
+#     CREATE DATABASE immich; CREATE USER immich WITH ENCRYPTED PASSWORD 'immich'; GRANT ALL PRIVILEGES ON DATABASE immich to immich;
+#\q"> setup_postgres.sql
+#psql "postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOSTNAME:$DB_PORT" < setup_postgres.sql || true
+$test=`pwd`
+$test1=`la -la`
+bashio::log.info "---------------------------"
+bashio::log.info $test1
+bashio::log.info $test
+bashio::log.info "---------------------------"
 ###############################################
 # Import / restore initial db (for migration) #
 ###############################################
-
+bashio::log.info "Checking for /share/postgresql_immich_restore.sql"
 if [ -f /share/postgresql_immich_restore.sql ]; then
-    bashio::log.info "Your previous database was detected at install under /share/postgresql_immich_restore.sql and will be imported"
+    bashio::log.info "Your previous database was detected at startup under /share/postgresql_immich_restore.sql and will be imported replacing existing db"
+    psql "postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOSTNAME:$DB_PORT" "DROP DATABASE immich; CREATE DATABASE immich; GRANT ALL PRIVILEGES ON DATABASE immich to immich;" || true
     cat "/share/postgresql_immich_restore.sql" \
     | sed "s/SELECT pg_catalog.set_config('search_path', '', false);/SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);/g" \
     | psql "postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOSTNAME:$DB_PORT" || true
